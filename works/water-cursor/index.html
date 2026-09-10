@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="カーソルに反応して水面の波が広がるWebページ" />
+  <title>Water Cursor</title>
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --text: #eefcff;
+      --muted: #b8d5db;
+      --line: rgba(220, 250, 255, 0.18);
+      --panel: rgba(8, 31, 43, 0.58);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-height: 100%;
+      background: #061a24;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      overflow-x: hidden;
+      color: var(--text);
+      font-family:
+        Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(24, 154, 183, 0.28), transparent 34%),
+        radial-gradient(circle at 82% 20%, rgba(40, 89, 153, 0.28), transparent 38%),
+        radial-gradient(circle at 55% 88%, rgba(20, 109, 119, 0.30), transparent 42%),
+        linear-gradient(145deg, #04151e 0%, #082936 52%, #051923 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 54px 54px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,.75), transparent 85%);
+    }
+
+    /* 波の描画レイヤー。ページ上のクリックを邪魔しない。 */
+    #water-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      mix-blend-mode: screen;
+      opacity: 0.94;
+      filter: saturate(1.12) contrast(1.05);
+    }
+
+    /* 標準カーソルの代わりに表示する小さな水滴。 */
+    #water-cursor {
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 30;
+      width: 18px;
+      height: 18px;
+      pointer-events: none;
+      border: 1px solid rgba(225, 254, 255, 0.85);
+      border-radius: 999px;
+      background: rgba(130, 229, 245, 0.12);
+      box-shadow:
+        0 0 18px rgba(121, 231, 255, 0.55),
+        inset 0 0 8px rgba(255, 255, 255, 0.36);
+      transform: translate3d(-50%, -50%, 0);
+      opacity: 0;
+      transition: opacity 160ms ease;
+      backdrop-filter: blur(2px);
+    }
+
+    @media (pointer: fine) {
+      body,
+      a,
+      button {
+        cursor: none;
+      }
+    }
+
+    main {
+      position: relative;
+      z-index: 1;
+      width: min(1120px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 24px 0 72px;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 10px 0;
+    }
+
+    .brand {
+      font-size: 0.9rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    .hero {
+      display: grid;
+      min-height: calc(100vh - 80px);
+      place-items: center;
+      padding: 72px 0;
+      text-align: center;
+    }
+
+    .hero-inner {
+      width: min(820px, 100%);
+    }
+
+    .eyebrow {
+      margin: 0 0 18px;
+      color: #a9e9f3;
+      font-size: 0.78rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(3.1rem, 10vw, 8.8rem);
+      font-weight: 500;
+      letter-spacing: -0.075em;
+      line-height: 0.88;
+      text-wrap: balance;
+    }
+
+    .lead {
+      max-width: 650px;
+      margin: 30px auto 0;
+      color: var(--muted);
+      font-size: clamp(1rem, 2vw, 1.18rem);
+      line-height: 1.9;
+    }
+
+    .hint {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 42px;
+      padding: 11px 16px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(4, 24, 32, 0.32);
+      color: #d5f7fb;
+      font-size: 0.88rem;
+      backdrop-filter: blur(12px);
+    }
+
+    .hint-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #baf8ff;
+      box-shadow: 0 0 12px rgba(160, 244, 255, 0.9);
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      padding: 40px 0 80px;
+    }
+
+    .card {
+      min-height: 220px;
+      padding: 26px;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: var(--panel);
+      backdrop-filter: blur(18px);
+    }
+
+    .card span {
+      color: #93dbe7;
+      font-size: 0.78rem;
+      letter-spacing: 0.14em;
+    }
+
+    .card h2 {
+      margin: 42px 0 10px;
+      font-size: 1.35rem;
+      font-weight: 500;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    @media (max-width: 760px) {
+      main {
+        width: min(100% - 28px, 1120px);
+      }
+
+      .hero {
+        min-height: 86vh;
+      }
+
+      .cards {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #water-canvas,
+      #water-cursor {
+        display: none;
+      }
+
+      body,
+      a,
+      button {
+        cursor: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 水面エフェクト用。ページの一番上に重ねる。 -->
+  <canvas id="water-canvas" aria-hidden="true"></canvas>
+  <div id="water-cursor" aria-hidden="true"></div>
+
+  <!-- ここから下はサンプルのページ内容。自由に置き換えてよい。 -->
+  <main>
+    <nav>
+      <a class="brand" href="../../" aria-label="作品一覧へ戻る">← Interaction Archive</a>
+      <a href="#about">About</a>
+    </nav>
+
+    <section class="hero">
+      <div class="hero-inner">
+        <p class="eyebrow">Interactive water surface</p>
+        <h1>Touch the<br />water.</h1>
+        <p class="lead">
+          カーソルを動かすと、その軌跡から波が生まれ、周囲へ広がります。
+          クリックすると、少し強い波紋が発生します。
+        </p>
+        <div class="hint">
+          <span class="hint-dot"></span>
+          カーソルをゆっくり動かしてみてください
+        </div>
+      </div>
+    </section>
+
+    <section class="cards" id="about">
+      <article class="card">
+        <span>01 / WAVE</span>
+        <h2>波が伝わる</h2>
+        <p>隣接する点へ高さを伝える、軽量な2次元波動シミュレーションです。</p>
+      </article>
+      <article class="card">
+        <span>02 / INPUT</span>
+        <h2>マウス・ペン・タッチ</h2>
+        <p>Pointer Eventsを使い、入力方法の違いを一つの処理で扱います。</p>
+      </article>
+      <article class="card">
+        <span>03 / DEPLOY</span>
+        <h2>そのまま公開</h2>
+        <p>外部ライブラリやビルド作業なし。index.html一つで公開できます。</p>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      if (reduceMotion.matches) return;
+
+      const canvas = document.querySelector('#water-canvas');
+      const cursor = document.querySelector('#water-cursor');
+      const ctx = canvas.getContext('2d', {
+        alpha: true,
+        desynchronized: true
+      });
+
+      let width = 0;
+      let height = 0;
+      let previous = new Float32Array(0);
+      let current = new Float32Array(0);
+      let next = new Float32Array(0);
+      let pixels = null;
+      let imageData = null;
+      let animationId = 0;
+      let lastPointer = null;
+      let visible = true;
+
+      /* 調整しやすいパラメータ */
+      window.settings = {
+        damping: 0.986,          // 1に近いほど波が長く残る
+        moveStrength: 1.25,      // カーソル移動時の波の強さ
+        clickStrength: 5.0,      // クリック時の波の強さ
+        disturbanceRadius: 4,    // 波を起こす範囲
+        trailSpacing: 8,         // 軌跡上に波を置く間隔（CSS px）
+        renderOpacity: 205,      // 波の最大不透明度
+        maxSimulationPixels: 135000 // 大きいほど高精細・重い
+      };
+
+      function resize() {
+        const cssWidth = Math.max(1, window.innerWidth);
+        const cssHeight = Math.max(1, window.innerHeight);
+
+        // 画面が大きくても計算量が増えすぎないよう、内部解像度を抑える。
+        const scale = Math.max(
+          2.2,
+          Math.sqrt((cssWidth * cssHeight) / settings.maxSimulationPixels)
+        );
+
+        width = Math.max(120, Math.floor(cssWidth / scale));
+        height = Math.max(80, Math.floor(cssHeight / scale));
+
+        canvas.width = width;
+        canvas.height = height;
+        canvas.style.width = `${cssWidth}px`;
+        canvas.style.height = `${cssHeight}px`;
+
+        const length = width * height;
+        previous = new Float32Array(length);
+        current = new Float32Array(length);
+        next = new Float32Array(length);
+        imageData = ctx.createImageData(width, height);
+        pixels = imageData.data;
+        lastPointer = null;
+      }
+
+      function cssToSimulation(cssX, cssY) {
+        return {
+          x: (cssX / window.innerWidth) * width,
+          y: (cssY / window.innerHeight) * height
+        };
+      }
+
+      function disturb(cssX, cssY, strength, radius = settings.disturbanceRadius) {
+        const point = cssToSimulation(cssX, cssY);
+        const centerX = Math.round(point.x);
+        const centerY = Math.round(point.y);
+
+        for (let offsetY = -radius; offsetY <= radius; offsetY += 1) {
+          const y = centerY + offsetY;
+          if (y <= 1 || y >= height - 2) continue;
+
+          for (let offsetX = -radius; offsetX <= radius; offsetX += 1) {
+            const x = centerX + offsetX;
+            if (x <= 1 || x >= width - 2) continue;
+
+            const distance = Math.hypot(offsetX, offsetY);
+            if (distance > radius) continue;
+
+            const falloff = 1 - distance / radius;
+            current[y * width + x] += strength * falloff;
+          }
+        }
+      }
+
+      function disturbLine(from, to, strength) {
+        const distance = Math.hypot(to.x - from.x, to.y - from.y);
+        const steps = Math.max(1, Math.ceil(distance / settings.trailSpacing));
+
+        for (let index = 1; index <= steps; index += 1) {
+          const amount = index / steps;
+          disturb(
+            from.x + (to.x - from.x) * amount,
+            from.y + (to.y - from.y) * amount,
+            strength
+          );
+        }
+      }
+
+      function updateWave() {
+        const damping = settings.damping;
+
+        for (let y = 1; y < height - 1; y += 1) {
+          const row = y * width;
+
+          for (let x = 1; x < width - 1; x += 1) {
+            const index = row + x;
+
+            // 離散化した2次元波動方程式。
+            next[index] = (
+              (current[index - 1] +
+                current[index + 1] +
+                current[index - width] +
+                current[index + width]) * 0.5 -
+              previous[index]
+            ) * damping;
+          }
+        }
+
+        const oldPrevious = previous;
+        previous = current;
+        current = next;
+        next = oldPrevious;
+        next.fill(0);
+      }
+
+      function renderWave() {
+        pixels.fill(0);
+
+        for (let y = 1; y < height - 1; y += 1) {
+          const row = y * width;
+
+          for (let x = 1; x < width - 1; x += 1) {
+            const index = row + x;
+            const leftRight = current[index - 1] - current[index + 1];
+            const topBottom = current[index - width] - current[index + width];
+            const amplitude = current[index];
+
+            const edge = Math.abs(leftRight) + Math.abs(topBottom);
+            const energy = Math.min(1, edge * 1.15 + Math.abs(amplitude) * 0.10);
+            if (energy < 0.012) continue;
+
+            // 波面の傾きから簡易的な光を作る。
+            const light = Math.max(
+              0,
+              Math.min(1, 0.54 + leftRight * 1.7 - topBottom * 0.9)
+            );
+
+            const pixelIndex = index * 4;
+            pixels[pixelIndex] = 95 + light * 105;       // R
+            pixels[pixelIndex + 1] = 188 + light * 62;   // G
+            pixels[pixelIndex + 2] = 218 + light * 37;   // B
+            pixels[pixelIndex + 3] = Math.min(
+              settings.renderOpacity,
+              energy * settings.renderOpacity
+            );
+          }
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+      }
+
+      function animate() {
+        if (!visible) return;
+        updateWave();
+        renderWave();
+        animationId = requestAnimationFrame(animate);
+      }
+
+      function updateCursor(x, y) {
+        cursor.style.transform = `translate3d(${x - 9}px, ${y - 9}px, 0)`;
+        cursor.style.opacity = '1';
+      }
+
+      function handlePointerMove(event) {
+        const events = typeof event.getCoalescedEvents === 'function'
+          ? event.getCoalescedEvents()
+          : [event];
+
+        for (const pointEvent of events) {
+          const point = { x: pointEvent.clientX, y: pointEvent.clientY };
+
+          if (lastPointer) {
+            const speed = Math.hypot(
+              point.x - lastPointer.x,
+              point.y - lastPointer.y
+            );
+            const strength = settings.moveStrength * Math.min(1.8, 0.55 + speed / 24);
+            disturbLine(lastPointer, point, strength);
+          } else {
+            disturb(point.x, point.y, settings.moveStrength);
+          }
+
+          lastPointer = point;
+        }
+
+        if (event.pointerType === 'mouse' || event.pointerType === 'pen') {
+          updateCursor(event.clientX, event.clientY);
+        }
+      }
+
+      function handlePointerDown(event) {
+        disturb(
+          event.clientX,
+          event.clientY,
+          settings.clickStrength,
+          settings.disturbanceRadius + 3
+        );
+        cursor.style.transform = `translate3d(${event.clientX - 9}px, ${event.clientY - 9}px, 0) scale(0.72)`;
+      }
+
+      function handlePointerUp(event) {
+        if (event.pointerType === 'mouse' || event.pointerType === 'pen') {
+          cursor.style.transform = `translate3d(${event.clientX - 9}px, ${event.clientY - 9}px, 0) scale(1)`;
+        }
+      }
+
+      window.addEventListener('pointermove', handlePointerMove, { passive: true });
+      window.addEventListener('pointerdown', handlePointerDown, { passive: true });
+      window.addEventListener('pointerup', handlePointerUp, { passive: true });
+      window.addEventListener('pointercancel', () => { lastPointer = null; });
+      document.documentElement.addEventListener('mouseleave', () => {
+        cursor.style.opacity = '0';
+        lastPointer = null;
+      });
+      window.addEventListener('blur', () => {
+        cursor.style.opacity = '0';
+        lastPointer = null;
+      });
+      window.addEventListener('resize', resize, { passive: true });
+
+      document.addEventListener('visibilitychange', () => {
+        visible = !document.hidden;
+        cancelAnimationFrame(animationId);
+        if (visible) animate();
+      });
+
+      resize();
+      animate();
+
+      // 最初に効果があることを伝える、小さなデモ波。
+      window.setTimeout(() => {
+        disturb(window.innerWidth * 0.5, window.innerHeight * 0.52, 3.2, 7);
+      }, 450);
+    })();
+  </script>
+</body>
+</html>

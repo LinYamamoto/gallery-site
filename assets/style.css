@@ -1,0 +1,340 @@
+:root {
+  --background: #f2f2f0;
+  --page: #ffffff;
+  --text: #111111;
+  --line: #b9b9b9;
+  --thumbnail: #d9d9d9;
+}
+
+
+/* --------------------
+   Reset
+-------------------- */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--text);
+
+  font-family:
+    Arial,
+    Helvetica,
+    "Helvetica Neue",
+    sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+
+/* --------------------
+   Page
+-------------------- */
+
+.page {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  background: #fff;
+}
+
+
+/* --------------------
+   Header
+-------------------- */
+
+.site-header {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 22px 32px;
+}
+
+
+.logo {
+  font-size: 21px;
+  font-weight: 500;
+
+  letter-spacing: -0.04em;
+}
+
+
+.nav {
+  display: flex;
+
+  gap: 48px;
+}
+
+
+.nav a {
+  font-size: 20px;
+  font-weight: 400;
+
+  letter-spacing: -0.04em;
+
+  transition: opacity 160ms ease;
+}
+
+
+.nav a:hover {
+  opacity: 0.45;
+}
+
+
+/* --------------------
+   Hero
+-------------------- */
+
+.hero {
+  height: 370px;
+
+  display: flex;
+
+  justify-content: center;
+  align-items: center;
+}
+
+
+.hero h1 {
+  margin: 0;
+
+  font-size: 21px;
+  font-weight: 600;
+
+  letter-spacing: -0.04em;
+}
+
+
+/* --------------------
+   Works
+-------------------- */
+
+.works {
+  padding: 0 20px 180px;
+}
+
+
+.section-title {
+  border-bottom: 1px solid var(--line);
+
+  padding-bottom: 4px;
+
+  margin-bottom: 20px;
+}
+
+
+.section-title h2 {
+  margin: 0;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: 15px;
+  font-weight: 700;
+}
+
+
+.work-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 38px;
+}
+
+
+.work-item {
+  display: block;
+}
+
+
+.thumbnail {
+  width: 100%;
+
+  aspect-ratio: 1.5 / 1;
+
+  overflow: hidden;
+
+  background: var(--thumbnail);
+}
+
+
+.thumbnail img {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+
+  transition: transform 350ms ease;
+}
+
+
+.work-item h3 {
+  margin: 7px 0 0;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: 14px;
+
+  font-weight: 700;
+}
+
+
+a.work-item:hover img {
+  transform: scale(1.02);
+}
+
+
+a.work-item:hover h3 {
+  text-decoration: underline;
+}
+
+
+/* --------------------
+   About
+-------------------- */
+
+.about {
+  padding: 0 20px 160px;
+}
+
+
+.about-content {
+  max-width: 550px;
+
+  margin-left: auto;
+}
+
+
+.about-content p {
+  margin: 0;
+
+  font-size: 18px;
+
+  line-height: 1.65;
+
+  letter-spacing: -0.02em;
+}
+
+
+/* --------------------
+   Contact
+-------------------- */
+
+.contact {
+  padding: 0 20px 160px;
+}
+
+
+.contact-content {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: flex-start;
+
+  gap: 10px;
+}
+
+
+.contact-content a {
+  font-size: 18px;
+}
+
+
+.contact-content a:hover {
+  text-decoration: underline;
+}
+
+
+/* --------------------
+   Footer
+-------------------- */
+
+footer {
+  padding: 22px 20px;
+
+  border-top: 1px solid var(--line);
+
+  font-size: 12px;
+}
+
+
+/* --------------------
+   Mobile
+-------------------- */
+
+@media (max-width: 700px) {
+
+  .page {
+    width: calc(100% - 28px);
+
+    margin: 14px auto;
+  }
+
+
+  .site-header {
+    padding: 20px;
+  }
+
+
+  .logo {
+    font-size: 15px;
+  }
+
+
+  .nav {
+    gap: 20px;
+  }
+
+
+  .nav a {
+    font-size: 15px;
+  }
+
+
+  .hero {
+    height: 300px;
+  }
+
+
+  .hero h1 {
+    font-size: 18px;
+  }
+
+
+  .works,
+  .about,
+  .contact {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+
+  .work-grid {
+    grid-template-columns: 1fr;
+
+    gap: 42px;
+  }
+
+}
