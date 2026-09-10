@@ -155,7 +155,7 @@ function draw() {
   if (!width || !height) return;
 
   // 高解像度ディスプレイに対応
-  const pixelRatio = window.devicePixelRatio || 1;
+  const pixelRatio = Math.max( 3, window.devicePixelRatio || 1 );
 
   canvas.width = Math.round(width * pixelRatio);
   canvas.height = Math.round(height * pixelRatio);
