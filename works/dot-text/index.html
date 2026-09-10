@@ -3,17 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="入力した文字をドットで描くインタラクション作品" />
+  <meta
+    name="description"
+    content="入力した文字をドットで描き、形・サイズ・間隔・角の丸みを調整して透過PNGで保存できる作品"
+  />
   <title>Dot Text | Interaction Archive</title>
+
   <link rel="stylesheet" href="./style.css" />
   <script src="./script.js" defer></script>
 </head>
+
 <body>
   <main class="workspace">
-    <a class="back-link" href="../../">←</a>
+    <a class="back-link" href="../../">
+      ← Interaction Archive
+    </a>
 
     <div class="preview">
-      <canvas id="dot-canvas" role="img" aria-label="入力した文字のドット表示">
+      <canvas
+        id="dot-canvas"
+        role="img"
+        aria-label="入力した文字のドット表示"
+      >
         入力した文字をドットで表示します。
       </canvas>
     </div>
@@ -21,11 +32,34 @@
     <div class="controls">
       <label class="control" for="dot-color">
         <span>color</span>
-        <input id="dot-color" type="color" value="#222222" />
+        <input
+          id="dot-color"
+          type="color"
+          value="#222222"
+        />
+      </label>
+
+      <label class="control" for="dot-shape">
+        <span>
+          dot shape
+          <output id="shape-value" for="dot-shape">4</output>
+        </span>
+        <input
+          id="dot-shape"
+          type="range"
+          min="3"
+          max="12"
+          step="1"
+          value="4"
+          aria-valuetext="4角形"
+        />
       </label>
 
       <label class="control" for="dot-size">
-        <span>dot size</span>
+        <span>
+          dot size
+          <output id="size-value" for="dot-size">2</output>
+        </span>
         <input
           id="dot-size"
           type="range"
@@ -36,12 +70,34 @@
         />
       </label>
 
-      <label class="control" for="dot-shape">
-        <span>dot shape</span>
-        <select id="dot-shape">
-          <option value="circle">丸</option>
-          <option value="square">四角</option>
-        </select>
+      <label class="control" for="dot-spacing">
+        <span>
+          spacing
+          <output id="spacing-value" for="dot-spacing">1.5</output>
+        </span>
+        <input
+          id="dot-spacing"
+          type="range"
+          min="0"
+          max="16"
+          step="0.5"
+          value="1.5"
+        />
+      </label>
+
+      <label class="control" for="dot-corner">
+        <span>
+          corner
+          <output id="corner-value" for="dot-corner">0%</output>
+        </span>
+        <input
+          id="dot-corner"
+          type="range"
+          min="0"
+          max="100"
+          step="1"
+          value="0"
+        />
       </label>
     </div>
 
@@ -55,6 +111,12 @@
         autocomplete="off"
         spellcheck="false"
       />
+    </div>
+
+    <div class="save-control">
+      <button id="save-image" type="button">
+        透過PNGで保存
+      </button>
     </div>
   </main>
 </body>
