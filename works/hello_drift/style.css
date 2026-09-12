@@ -24,10 +24,13 @@ main {
 }
 
 .back-link {
-  display: inline-block;
-  margin-bottom: 28px;
-  color: #000000;
-  font-size: 14px;
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  z-index: 10;
+
+  color: #000;
+  font-size: 20px;
   text-decoration: none;
 }
 
