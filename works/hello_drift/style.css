@@ -1,0 +1,17 @@
+*{box-sizing:border-box}
+:root{font-family:Arial,"Helvetica Neue",sans-serif;color:#242424;background:#fff;color-scheme:light}
+html,body,main{width:100%;height:100%;margin:0;overflow:hidden}
+main{position:relative;min-height:240px}
+#field{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+footer{position:absolute;left:36px;right:28px;bottom:max(22px,env(safe-area-inset-bottom));display:flex;align-items:center;justify-content:space-between;gap:24px;pointer-events:none}
+.signature{font-size:12px;letter-spacing:.14em;white-space:nowrap;color:#666}
+.separator{padding:0 9px;color:#aaa}
+.hint{margin:0;font-size:12px;letter-spacing:.06em;line-height:1.7;color:#737373;text-align:center}
+.touch-hint{display:none}
+button{pointer-events:auto;display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;border:1px solid transparent;background:rgba(255,255,255,.85);color:#666;border-radius:50%;cursor:pointer;transition:background .2s,border-color .2s}
+button:hover{background:#f3f3f3;border-color:#e8e8e8}
+button:focus-visible{outline:2px solid #242424;outline-offset:3px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+noscript{position:absolute;top:30px;left:30px;font-size:16px}
+@media(pointer:coarse){.desktop-hint{display:none}.touch-hint{display:inline}}
+@media(max-width:600px){footer{left:20px;right:12px;bottom:max(16px,env(safe-area-inset-bottom));gap:10px;flex-wrap:wrap}.signature{font-size:12px}.hint{position:absolute;left:0;right:0;bottom:60px;font-size:12px}.separator{padding:0 4px}}

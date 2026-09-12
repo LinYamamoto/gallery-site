@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="マウスを止めると、Hello のドットが8方向へ離れ、画面の外へ消えていく。動かすと、また文字になる。">
+  <title>Hello — Drift</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./main.js" defer></script>
+</head>
+<body>
+  <main aria-label="ドットでできた Hello。マウスを止めると8方向へ離れて画面外へ消え、動かすと文字に戻ります。">
+    <canvas id="field" aria-hidden="true"></canvas>
+    <h1 class="sr-only">Hello</h1>
+    <footer>
+      <span class="signature">HELLO <span class="separator">/</span> DRIFT</span>
+      <p class="hint"><span class="desktop-hint">マウスを止めると、ほどける。動かすと、戻る。</span><span class="touch-hint">指を動かすと、戻る。手を離すと、ほどける。</span></p>
+      <button id="pause" type="button" aria-label="アニメーションを一時停止" aria-pressed="false"><svg id="pause-icon" viewBox="0 0 20 20" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M5 4h3v12H5zm7 0h3v12h-3z"/></svg><span id="pause-label" class="sr-only">一時停止</span></button>
+    </footer>
+    <noscript>このインタラクションを見るには JavaScript を有効にしてください。</noscript>
+  </main>
+</body>
+</html>
