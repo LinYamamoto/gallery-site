@@ -7,6 +7,8 @@ const ctx = canvas.getContext("2d");
 // 入力欄・操作部品
 const textInput = document.querySelector("#text-input");
 const colorInput = document.querySelector("#dot-color");
+const backgroundColorInput = document.querySelector("#background-color");
+const backgroundTransparentInput = document.querySelector("#background-transparent");
 const shapeInput = document.querySelector("#dot-shape");
 const sizeInput = document.querySelector("#dot-size");
 const spacingInput = document.querySelector("#dot-spacing");
@@ -169,8 +171,13 @@ function draw() {
     0
   );
 
-  // 背景色を塗らず、透明にする
+  // 背景を初期化し、必要に応じて指定色で塗る
   ctx.clearRect(0, 0, width, height);
+
+  if (!backgroundTransparentInput.checked) {
+    ctx.fillStyle = backgroundColorInput.value;
+    ctx.fillRect(0, 0, width, height);
+  }
 
   const text = textInput.value;
 
@@ -314,6 +321,8 @@ function requestDraw() {
 [
   textInput,
   colorInput,
+  backgroundColorInput,
+  backgroundTransparentInput,
   shapeInput,
   sizeInput,
   spacingInput,
@@ -331,8 +340,17 @@ window.addEventListener("resize", requestDraw);
 // フォント読み込み後に再描画
 document.fonts.ready.then(requestDraw);
 
+function updateSaveButtonLabel() {
+  saveButton.textContent = backgroundTransparentInput.checked
+    ? "透過PNGで保存"
+    : "PNGで保存";
+}
+
+backgroundTransparentInput.addEventListener("change", updateSaveButtonLabel);
+updateSaveButtonLabel();
+
 /**
- * 背景が透明なPNGとして保存
+ * 現在の背景設定でPNGとして保存
  */
 saveButton.addEventListener("click", () => {
   if (!textInput.value.trim()) {

@@ -78,13 +78,27 @@ button {
   font: inherit;
 }
 
-#dot-color {
+#dot-color,
+#background-color {
   width: 42px;
   height: 30px;
   padding: 2px;
   border: 1px solid #ccc;
   background: #fff;
   cursor: pointer;
+}
+
+.background-transparent {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.background-transparent input {
+  margin: 0;
 }
 
 .controls input[type="range"] {
